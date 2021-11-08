@@ -2,7 +2,9 @@ from typing import NamedTuple
 import openpyxl as excel
 import calendar
 import itertools
-from openpyxl.styles import PatternFill
+from openpyxl.styles import PatternFill 
+from openpyxl.styles.alignment import Alignment
+from openpyxl.utils import get_column_letter
 
 
 class GenSheet():
@@ -33,6 +35,7 @@ class GenSheet():
         ws.cell(row=1, column=1).value = self.__month + "月"
         for index, val in enumerate(value):
             ws.cell(row=1, column=index+3).value = val
+            ws.cell(row=1, column=index+3).alignment = Alignment(horizontal='center', vertical='center')
         # set date
         for index, val in enumerate(self.__days):
             week_flg = self.__str_week(
@@ -58,6 +61,22 @@ class GenSheet():
                     ws[cell.coordinate].fill = fill
                     ws[ws.cell(row=index+1, column=1).coordinate].fill = fill
 
+    def __set_sizeof_cell(self, key: str) -> None:
+        ws = self.__wb[key]
+        # set high
+        for index, row in enumerate(ws):
+            ws.row_dimensions[index+2].height = 99.75
+        # set width
+        for row in ws:
+            for index, cell in enumerate(row):
+                if index < 2:
+                    ws.column_dimensions[get_column_letter(index+1)].width = 8.38
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                else:
+                    ws.column_dimensions[get_column_letter(index+1)].width = 30
+
+
+
     def gen(self) -> None:
         # add sheet
         for legend in self.__legends._asdict():
@@ -68,6 +87,9 @@ class GenSheet():
         # set bgcolor
         for legend in self.__legends._asdict():
             self.__fill_background_color(legend)
+        # set wide and high of cell
+        for legend in self.__legends._asdict():
+            self.__set_sizeof_cell(legend)
         # delete init sheet
         self.__wb.remove(self.__wb['Sheet'])
         self.__wb.save(self.__wbname)
