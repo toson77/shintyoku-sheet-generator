@@ -1,3 +1,4 @@
+from typing import NamedTuple
 import openpyxl as excel
 import calendar
 import itertools
@@ -5,7 +6,7 @@ from openpyxl.styles import PatternFill
 
 
 class GenSheet():
-    def __init__(self, legends: dict, filename: str, month: int, year: int = 2021):
+    def __init__(self, legends: NamedTuple, filename: str, month: int, year: int = 2021):
         # excel file gen
         self.__wb = excel.Workbook()
         self.__legends = legends
@@ -47,7 +48,7 @@ class GenSheet():
             '(月)', '(火)', '(水)', '(木)', '(金)', '(土)', '(日)')
         return day_tuple[flag]
 
-    def __fill_background_color(self, key: str):
+    def __fill_background_color(self, key: str) -> None:
         # backgroundcolor
         ws = self.__wb[key]
         for index, row in enumerate(ws):
@@ -57,15 +58,15 @@ class GenSheet():
                     ws[cell.coordinate].fill = fill
                     ws[ws.cell(row=index+1, column=1).coordinate].fill = fill
 
-    def gen(self):
+    def gen(self) -> None:
         # add sheet
-        for legend in self.__legends:
+        for legend in self.__legends._asdict():
             self.__wb.create_sheet(title=legend)
         # make sheet
-        for legend in self.__legends.items():
+        for legend in self.__legends._asdict().items():
             self.__make_sheet(legend[0], legend[1])
         # set bgcolor
-        for legend in self.__legends:
+        for legend in self.__legends._asdict():
             self.__fill_background_color(legend)
         # delete init sheet
         self.__wb.remove(self.__wb['Sheet'])
